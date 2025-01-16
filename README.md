@@ -75,15 +75,15 @@ TF=5100=0.05TF=1005​=0.05
 ### 3. Calcul de la Fréquence Inverse des Documents (IDF)
 
 L’importance d’un terme dans la collection entière est calculée à l’aide de la formule :
-IDF=log⁡10NntIDF=log10​nt​N​, où NN est le nombre total de documents et ntnt​ le nombre de documents contenant TT.
+IDF=log⁡(N/df)​, où NN est le nombre total de documents et ntnt​ le nombre de documents contenant TT.
 
 Exemple :
-Terme : "football", N=100N=100, nt=10nt​=10
-IDF=log⁡1010010=1.0000IDF=log10​10100​=1.0000
+Terme : "football", N=100, df=10
+IDF=1
 
 ### 4. Calcul du Poids TF-IDF
 
-Le score TF-IDF d’un terme dans un document est obtenu en multipliant TFTF et IDFIDF.
+Le score TF-IDF d’un terme dans un document est obtenu en multipliant TF et IDF.
 
 Exemple :
 TF=0.05TF=0.05, IDF=1.0000IDF=1.0000
