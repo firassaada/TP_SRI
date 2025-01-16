@@ -36,7 +36,7 @@ Sortie : ["jouer", "joueur"]
 Résultat Final
 
 Après ces étapes, les tokens obtenus sont propres, cohérents et prêts pour l’indexation.
-Index Inversé
+#### Index Inversé
 
 Un index inversé est une structure de données qui relie chaque terme à la liste des documents dans lesquels il apparaît, accompagné de son score TF-IDF. Cela permet une recherche rapide et efficace.
 Structure de l’Index
