@@ -22,12 +22,12 @@ server.post("/search", (request, response) => {
   }
 
   let tfidfIndex;
+  const documents = retrieveDocuments(docsDirectory);
 
   if (fs.existsSync(indexFilePath)) {
     const fileContent = fs.readFileSync(indexFilePath, "utf-8");
     tfidfIndex = JSON.parse(fileContent);
   } else {
-    const documents = retrieveDocuments(docsDirectory);
     if (documents.length === 0) {
       response
         .status(400)
@@ -38,8 +38,6 @@ server.post("/search", (request, response) => {
     tfidfIndex = computeTFIDF(documents);
     fs.writeFileSync(indexFilePath, JSON.stringify(tfidfIndex, null, 2), "utf-8");
   }
-
-  const documents = retrieveDocuments(docsDirectory);
   const searchResults = executeSearch(searchQuery, tfidfIndex);
   const formattedResults = searchResults.map(result => ({
     id: result.id + 1,
