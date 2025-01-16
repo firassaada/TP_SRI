@@ -1,4 +1,4 @@
-#Prétraitement et Index Inversé
+## Prétraitement et Index Inversé
 Prétraitement
 
 Le prétraitement des documents est une étape essentielle pour garantir la cohérence et la qualité des données avant l’indexation. Voici les étapes suivies :
