@@ -1,73 +1,68 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const { calculateTFIDF, search, loadDocuments } = require("./processing");
+const { computeTFIDF, executeSearch, retrieveDocuments } = require("./processing");
 
-const app = express();
-app.use(express.json()); // Middleware to parse JSON body
-const PORT = 3000;
+const server = express();
+server.use(express.json());
+const SERVER_PORT = 3000;
 
-const documentsFolder = path.join(__dirname, "documents");
-const invertedIndexPath = path.join(__dirname, "inverted_index.json");
+const docsDirectory = path.join(__dirname, "documents");
+const indexFilePath = path.join(__dirname, "inverted_index.json");
 
-if (!fs.existsSync(documentsFolder)) {
-  fs.mkdirSync(documentsFolder);
+if (!fs.existsSync(docsDirectory)) {
+  fs.mkdirSync(docsDirectory);
 }
 
-app.post("/search", (req, res) => {
-  const { query } = req.body;
-  if (!query) {
-    return res.status(400).send("Query parameter 'q' is required.");
+server.post("/search", (request, response) => {
+  const { query: searchQuery } = request.body;
+  if (!searchQuery) {
+    response.status(400).send("Query parameter 'q' is required.");
+    return;
   }
 
-  let tfidf = null;
+  let tfidfIndex;
 
-  if (fs.existsSync(invertedIndexPath)) {
-    const data = fs.readFileSync(invertedIndexPath, "utf-8");
-    tfidf = JSON.parse(data);
+  if (fs.existsSync(indexFilePath)) {
+    const fileContent = fs.readFileSync(indexFilePath, "utf-8");
+    tfidfIndex = JSON.parse(fileContent);
   } else {
-    const documents = loadDocuments(documentsFolder);
+    const documents = retrieveDocuments(docsDirectory);
     if (documents.length === 0) {
-      return res
+      response
         .status(400)
-        .send(
-          "No documents found. Add some .txt files to the documents folder."
-        );
+        .send("No documents found. Add some .txt files to the documents folder.");
+      return;
     }
 
-    tfidf = calculateTFIDF(documents);
-    fs.writeFileSync(
-      invertedIndexPath,
-      JSON.stringify(tfidf, null, 2),
-      "utf-8"
-    );
+    tfidfIndex = computeTFIDF(documents);
+    fs.writeFileSync(indexFilePath, JSON.stringify(tfidfIndex, null, 2), "utf-8");
   }
 
-  const documents = loadDocuments(documentsFolder);
-  const results = search(query, tfidf);
-  const response = results.map((result) => ({
+  const documents = retrieveDocuments(docsDirectory);
+  const searchResults = executeSearch(searchQuery, tfidfIndex);
+  const formattedResults = searchResults.map(result => ({
     id: result.id + 1,
     score: result.score.toFixed(4),
     snippet: documents[result.id].substring(0, 200),
   }));
 
-  res.json(response);
+  response.json(formattedResults);
 });
 
-if (!fs.existsSync(invertedIndexPath)) {
-  const documents = loadDocuments(documentsFolder);
-  console.log("documents", documents);
+if (!fs.existsSync(indexFilePath)) {
+  const documents = retrieveDocuments(docsDirectory);
+  console.log("Loaded documents:", documents);
   if (documents.length === 0) {
-    return res
-      .status(400)
-      .send("No documents found. Add some .txt files to the documents folder.");
+    console.error("No documents found. Add some .txt files to the documents folder.");
+    process.exit(1);
   }
 
-  console.log("cal tfidf");
-  tfidf = calculateTFIDF(documents);
-  fs.writeFileSync(invertedIndexPath, JSON.stringify(tfidf, null, 2), "utf-8");
+  console.log("Generating TF-IDF index...");
+  const tfidfIndex = computeTFIDF(documents);
+  fs.writeFileSync(indexFilePath, JSON.stringify(tfidfIndex, null, 2), "utf-8");
 }
 
-app.listen(PORT, () => {
-  console.log(`Search API running at http://localhost:${PORT}`);
+server.listen(SERVER_PORT, () => {
+  console.log(`Search API is live at http://localhost:${SERVER_PORT}`);
 });

@@ -3,119 +3,109 @@ const path = require("path");
 const stopWords = require("stopword");
 const nlp = require("compromise");
 
-function preprocess(text) {
-  let doc = nlp(text);
-  doc = doc.normalize();
-  doc = doc.nouns().toSingular();
-  doc = doc.sentences().toPastTense();
+function cleanText(inputText) {
+  let document = nlp(inputText);
+  document = document.normalize();
+  document = document.nouns().toSingular();
+  document = document.sentences().toPastTense();
 
-  let lemmatizedText = doc.text();
-  let tokens = lemmatizedText.split(/\W+/);
+  const lemmatized = document.text();
+  let tokens = lemmatized.split(/\W+/);
   tokens = stopWords.removeStopwords(tokens);
 
   return tokens;
 }
 
-function calculateTFIDF(docs) {
-  const tf = {};
-  const idf = {};
-  const N = docs.length;
+function computeTFIDF(documents) {
+  const termFrequency = {};
+  const inverseDocFrequency = {};
+  const totalDocuments = documents.length;
 
-  docs.forEach((doc, docId) => {
-    const tokens = preprocess(doc);
-    tf[docId] = {};
+  documents.forEach((content, docIndex) => {
+    const tokens = cleanText(content);
+    termFrequency[docIndex] = {};
 
     const uniqueTokens = new Set(tokens);
 
-    tokens.forEach((token) => {
-      tf[docId][token] = (tf[docId][token] || 0) + 1;
+    tokens.forEach((term) => {
+      termFrequency[docIndex][term] = (termFrequency[docIndex][term] || 0) + 1;
     });
 
-    uniqueTokens.forEach((token) => {
-      idf[token] = (idf[token] || 0) + 1;
+    uniqueTokens.forEach((term) => {
+      inverseDocFrequency[term] = (inverseDocFrequency[term] || 0) + 1;
     });
   });
 
-  for (const term in idf) {
-    idf[term] = Math.log(N / idf[term]);
+  for (const term in inverseDocFrequency) {
+    inverseDocFrequency[term] = Math.log(totalDocuments / inverseDocFrequency[term]);
   }
 
-  const tfidf = {};
-  docs.forEach((doc, docId) => {
-    for (const term in tf[docId]) {
-      if (!tfidf[term]) {
-        tfidf[term] = {};
+  const tfidfScores = {};
+  documents.forEach((_, docIndex) => {
+    for (const term in termFrequency[docIndex]) {
+      if (!tfidfScores[term]) {
+        tfidfScores[term] = {};
       }
-      tfidf[term][docId] = tf[docId][term] * idf[term];
+      tfidfScores[term][docIndex] = termFrequency[docIndex][term] * inverseDocFrequency[term];
     }
   });
 
-  return tfidf;
+  return tfidfScores;
 }
 
-function cosineSimilarity(vectorA, vectorB) {
-  const dotProduct = Object.keys(vectorA).reduce((sum, key) => {
-    return sum + vectorA[key] * (vectorB[key] || 0);
-  }, 0);
+function calculateCosineSimilarity(vecA, vecB) {
+  const dotProduct = Object.keys(vecA).reduce((sum, key) => sum + vecA[key] * (vecB[key] || 0), 0);
 
-  const magnitudeA = Math.sqrt(
-    Object.values(vectorA).reduce((sum, val) => sum + val * val, 0)
-  );
-
-  const magnitudeB = Math.sqrt(
-    Object.values(vectorB).reduce((sum, val) => sum + val * val, 0)
-  );
+  const magnitudeA = Math.sqrt(Object.values(vecA).reduce((sum, value) => sum + value * value, 0));
+  const magnitudeB = Math.sqrt(Object.values(vecB).reduce((sum, value) => sum + value * value, 0));
 
   return magnitudeA && magnitudeB ? dotProduct / (magnitudeA * magnitudeB) : 0;
 }
 
-function search(query, tfidf) {
-  const queryTokens = preprocess(query);
+function executeSearch(query, tfidfIndex) {
+  const queryTokens = cleanText(query);
   const queryVector = {};
 
-  queryTokens.forEach((token) => {
-    queryVector[token] = (queryVector[token] || 0) + 1;
+  queryTokens.forEach((term) => {
+    queryVector[term] = (queryVector[term] || 0) + 1;
   });
 
-  const docScores = {};
+  const documentScores = {};
 
   for (const term in queryVector) {
-    if (tfidf[term]) {
-      for (const docId in tfidf[term]) {
-        const termWeight = queryVector[term] * tfidf[term][docId];
-        docScores[docId] = (docScores[docId] || 0) + termWeight;
+    if (tfidfIndex[term]) {
+      for (const docId in tfidfIndex[term]) {
+        const termWeight = queryVector[term] * tfidfIndex[term][docId];
+        documentScores[docId] = (documentScores[docId] || 0) + termWeight;
       }
     }
   }
 
-  return Object.keys(docScores)
-    .map((docId) => ({
-      id: parseInt(docId, 10),
-      score: docScores[docId],
-    }))
+  return Object.entries(documentScores)
+    .map(([docId, score]) => ({ id: parseInt(docId, 10), score }))
     .filter((result) => result.score > 0)
     .sort((a, b) => b.score - a.score);
 }
 
-function loadDocuments(folderPath) {
-  const documents = [];
-  const files = fs.readdirSync(folderPath);
+function retrieveDocuments(directoryPath) {
+  const fileContents = [];
+  const filenames = fs.readdirSync(directoryPath);
 
-  files.forEach((file) => {
-    const filePath = path.join(folderPath, file);
-    if (fs.statSync(filePath).isFile() && path.extname(file) === ".txt") {
-      const content = fs.readFileSync(filePath, "utf-8");
-      documents.push(content);
+  filenames.forEach((filename) => {
+    const fullPath = path.join(directoryPath, filename);
+    if (fs.statSync(fullPath).isFile() && path.extname(filename) === ".txt") {
+      const content = fs.readFileSync(fullPath, "utf-8");
+      fileContents.push(content);
     }
   });
 
-  return documents;
+  return fileContents;
 }
 
 module.exports = {
-  preprocess,
-  calculateTFIDF,
-  cosineSimilarity,
-  search,
-  loadDocuments,
+  cleanText,
+  computeTFIDF,
+  calculateCosineSimilarity,
+  executeSearch,
+  retrieveDocuments,
 };
