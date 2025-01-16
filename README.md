@@ -33,9 +33,11 @@ Les mots sont réduits à leur forme de base ou canonique pour uniformiser les d
 Exemple :
 Entrée : ["jouant", "joueurs"]
 Sortie : ["jouer", "joueur"]
+
 Résultat Final
 
 Après ces étapes, les tokens obtenus sont propres, cohérents et prêts pour l’indexation.
+
 #### Index Inversé
 
 Un index inversé est une structure de données qui relie chaque terme à la liste des documents dans lesquels il apparaît, accompagné de son score TF-IDF. Cela permet une recherche rapide et efficace.
@@ -119,7 +121,7 @@ Pourquoi l’utiliser ?
     Scores Normalisés : Les valeurs varient entre 0 (aucune similitude) et 1 (similitude parfaite).
     Efficacité : S’applique bien à des données textuelles éparses.
 
-Fonctionnement
+### Fonctionnement
 
 La similarité est calculée en mesurant l’angle entre les vecteurs. Plus l’angle est petit, plus les vecteurs sont similaires.
 Exemples de Requêtes
