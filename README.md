@@ -9,6 +9,7 @@ Le texte est converti en minuscules afin d’éliminer la sensibilité à la cas
 Exemple :
 Entrée : "Le Football est Amusant!"
 Sortie : "le football est amusant"
+
 2. Tokenisation
 
 Le texte normalisé est divisé en mots individuels, appelés tokens.
@@ -16,6 +17,7 @@ Le texte normalisé est divisé en mots individuels, appelés tokens.
 Exemple :
 Entrée : "le football est amusant"
 Sortie : ["le", "football", "est", "amusant"]
+
 3. Suppression des Mots Vides
 
 Les mots courants (comme "et", "le", "est") qui n’apportent pas de valeur significative sont retirés à l’aide d’une liste prédéfinie.
@@ -23,6 +25,7 @@ Les mots courants (comme "et", "le", "est") qui n’apportent pas de valeur sign
 Exemple :
 Entrée : ["le", "football", "est", "amusant"]
 Sortie : ["football", "amusant"]
+
 4. Lemmatisation
 
 Les mots sont réduits à leur forme de base ou canonique pour uniformiser les données (par exemple, "joueurs" devient "joueur").
@@ -54,9 +57,11 @@ Exemple :
 }
 
 Étapes de Construction
+
 1. Prétraitement
 
 Chaque document est soumis aux étapes de prétraitement décrites ci-dessus.
+
 2. Calcul de la Fréquence des Termes (TF)
 
 La fréquence d’un terme tt dans un document dd est calculée comme le rapport du nombre d’occurrences de tt sur le nombre total de termes dans dd.
@@ -64,6 +69,7 @@ La fréquence d’un terme tt dans un document dd est calculée comme le rapport
 Exemple :
 Terme : "football", Nombre d’occurrences : 5, Total de mots : 100
 TF=5100=0.05TF=1005​=0.05
+
 3. Calcul de la Fréquence Inverse des Documents (IDF)
 
 L’importance d’un terme dans la collection entière est calculée à l’aide de la formule :
@@ -72,6 +78,7 @@ IDF=log⁡10NntIDF=log10​nt​N​, où NN est le nombre total de documents et
 Exemple :
 Terme : "football", N=100N=100, nt=10nt​=10
 IDF=log⁡1010010=1.0000IDF=log10​10100​=1.0000
+
 4. Calcul du Poids TF-IDF
 
 Le score TF-IDF d’un terme dans un document est obtenu en multipliant TFTF et IDFIDF.
@@ -79,6 +86,7 @@ Le score TF-IDF d’un terme dans un document est obtenu en multipliant TFTF et 
 Exemple :
 TF=0.05TF=0.05, IDF=1.0000IDF=1.0000
 TF−IDF=0.05×1.0000=0.0500TF−IDF=0.05×1.0000=0.0500
+
 5. Stockage de l’Index
 
 Les résultats sont enregistrés dans un fichier JSON (par exemple, index_inversé.json) pour permettre une recherche rapide.
