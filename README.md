@@ -66,7 +66,7 @@ Chaque document est soumis aux étapes de prétraitement décrites ci-dessus.
 
 ### 2. Calcul de la Fréquence des Termes (TF)
 
-La fréquence d’un terme tt dans un document dd est calculée comme le rapport du nombre d’occurrences de tt sur le nombre total de termes dans dd.
+La fréquence d’un terme TT dans un document DD est calculée comme le rapport du nombre d’occurrences de TT sur le nombre total de termes dans DD.
 
 Exemple :
 Terme : "football", Nombre d’occurrences : 5, Total de mots : 100
@@ -75,7 +75,7 @@ TF=5100=0.05TF=1005​=0.05
 ### 3. Calcul de la Fréquence Inverse des Documents (IDF)
 
 L’importance d’un terme dans la collection entière est calculée à l’aide de la formule :
-IDF=log⁡10NntIDF=log10​nt​N​, où NN est le nombre total de documents et ntnt​ le nombre de documents contenant tt.
+IDF=log⁡10NntIDF=log10​nt​N​, où NN est le nombre total de documents et ntnt​ le nombre de documents contenant TT.
 
 Exemple :
 Terme : "football", N=100N=100, nt=10nt​=10
@@ -91,7 +91,7 @@ TF−IDF=0.05×1.0000=0.0500TF−IDF=0.05×1.0000=0.0500
 
 ### 5. Stockage de l’Index
 
-Les résultats sont enregistrés dans un fichier JSON (par exemple, index_inversé.json) pour permettre une recherche rapide.
+Les résultats sont enregistrés dans un fichier JSON (par exemple, index_inversé.json) pour permeTTre une recherche rapide.
 
 Exemple de Fichier JSON :
 
